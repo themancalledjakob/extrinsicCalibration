@@ -11,12 +11,10 @@ import numpy as np
 from utils.config import LoadConfig, SaveConfig
 
 
-
 results = []
 
 
 def get_args():
-    # Setup argument parser
     # and parse the inputs
     arg_parser = argparse.ArgumentParser()
 
@@ -174,9 +172,6 @@ def main():
                     conditions_met = True
         else:
             img_markers = img
-
-        
-
 
 
         # Write the image with markers back into the same folder

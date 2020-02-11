@@ -189,9 +189,15 @@ square_size = 0.02315
 
 
 #realsense - dist coeff are not provided, pass in zeros
-mtx = np.array([[617.0289198,0,422.6674499],[0,617.010437011,248.56015],[0,0,1]])
-dist = np.zeros(5)
+#mtx = np.array([[617.0289198,0,422.6674499],[0,617.010437011,248.56015],[0,0,1]])
+#dist = np.zeros(5)
 
+#of
+mtx = np.array([[ 8.0809912387136933e+02, 0., 9.5943089385626479e+02],[0.,
+       8.0909997128958412e+02, 5.3965078087737686e+02],[0., 0., 1. ]]);
+dist = np.array([ -1.0543987710472590e-03, 1.9362203041455336e-03,
+       -9.6512091648094387e-05, 3.1913659287220633e-05,
+       -1.1081110502238125e-03 ]);
 
 cx = mtx.flatten()[2]
 cy = mtx.flatten()[5]
@@ -214,45 +220,45 @@ axisLen = square_size * 2
 axis = np.float32([[axisLen,0,0], [0,axisLen,0], [0,0,-axisLen]]).reshape(-1,3)
 
 for fname in os.listdir(args['img_dir']):
-	#print fname
-	objpoints = [] # 3d point in real world space
-	imgpoints = [] # 2d points in image plane.
-	img = cv.imread(args['img_dir']+fname)
-	img_raw = img.copy()
-	gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    #print fname
+    objpoints = [] # 3d point in real world space
+    imgpoints = [] # 2d points in image plane.
+    img = cv.imread(args['img_dir']+fname)
+    img_raw = img.copy()
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-	try:
-		#print (args['depth_img_dir']+fname.replace(".png",".npy"))
-		depth = np.load(args['depth_img_dir']+fname.replace(".png",".npy"))
-		
+    try:
+        #print (args['depth_img_dir']+fname.replace(".png",".npy"))
+        depth = np.load(args['depth_img_dir']+fname.replace(".png",".npy"))
+        
 
-	except:
-		print ("no corresponding depth img for: ", fname)
+    except:
+        print ("no corresponding depth img for: ", fname)
 
-	#cv.imshow(fname,cv.resize(gray,(500,500)))
-	#cv.waitKey(1000)
+    #cv.imshow(fname,cv.resize(gray,(500,500)))
+    #cv.waitKey(1000)
 
     # Find the chess board corners
-	ret, corners = cv.findChessboardCorners(gray, (9,6), None)
-	# If found, add object points, image points (after refining them)
-	
-	if ret == True:
+    ret, corners = cv.findChessboardCorners(gray, (9,6), None)
+    # If found, add object points, image points (after refining them)
+    
+    if ret == True:
 
-	    objpoints.append(objp)
-	    corners2 = cv.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
-	    imgpoints.append(corners2)
-	    # Draw and display the corners
-	    cv.drawChessboardCorners(img, (9,6), corners2, ret)
-	    
-	    imgp = np.array(imgpoints).reshape(-1,2)
-	    _,rvec,tvec = cv.solvePnP(objp, imgp, mtx, dist)
-	    imgpts, jac = cv.projectPoints(axis, rvec, tvec, mtx, dist)
-	    img = draw(img,corners2,imgpts)
-	    #cv.imshow('img',cv.resize(img,(900,700)))
-	    #cv.waitKey(0)
+        objpoints.append(objp)
+        corners2 = cv.cornerSubPix(gray,corners, (11,11), (-1,-1), criteria)
+        imgpoints.append(corners2)
+        # Draw and display the corners
+        cv.drawChessboardCorners(img, (9,6), corners2, ret)
+        
+        imgp = np.array(imgpoints).reshape(-1,2)
+        _,rvec,tvec = cv.solvePnP(objp, imgp, mtx, dist)
+        imgpts, jac = cv.projectPoints(axis, rvec, tvec, mtx, dist)
+        img = draw(img,corners2,imgpts)
+        cv.imshow('img',cv.resize(img,(900,700)))
+        cv.waitKey(0)
 
 
-	    #project image points into 3D
+        #project image points into 3D
 
         pts3D = compute3d(imgp.astype(int),depth,fx,fy,cx,cy,window=10)
         
